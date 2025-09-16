@@ -350,8 +350,10 @@
         }
         
         submitBtn.addEventListener('click', async () => {
-            submitBtn.style.display = 'none';
-            processing.classList.add('show');
+    alert('Please email your EDF file to contact@cgtheory.com for beta analysis. We will process it within 24 hours.');
+    processing.style.display = 'none';
+    submitBtn.style.display = 'block';
+});
             
             // Create FormData
             const formData = new FormData();
