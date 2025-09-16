@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CGT EEG Analysis - Upload</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+        
+        .upload-area {
+            border: 2px dashed #ddd;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: #fafafa;
+        }
+        
+        .upload-area:hover {
+            border-color: #667eea;
+            background: #f5f3ff;
+        }
+        
+        .upload-area.dragover {
+            border-color: #667eea;
+            background: #f5f3ff;
+            transform: scale(1.02);
+        }
+        
+        .upload-icon {
+            font-size: 48px;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+        
+        .upload-text {
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        
+        .btn:hover {
+            background: #5a67d8;
+        }
+        
+        .file-info {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f7fafc;
+            border-radius: 10px;
+            display: none;
+        }
+        
+        .file-info.show {
+            display: block;
+        }
+        
+        .file-name {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .file-size {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .analysis-options {
+            margin-top: 30px;
+            display: none;
+        }
+        
+        .analysis-options.show {
+            display: block;
+        }
+        
+        .option {
+            margin-bottom: 15px;
+        }
+        
+        .option label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .option input[type="checkbox"] {
+            margin-right: 10px;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        
+        .submit-btn {
+            margin-top: 30px;
+            width: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 15px;
+            font-size: 18px;
+            display: none;
+        }
+        
+        .submit-btn.show {
+            display: block;
+        }
+        
+        .submit-btn:hover {
+            background: linear-gradient(135deg, #5a67d8 0%, #6b4199 100%);
+        }
+        
+        .price {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 24px;
+            color: #333;
+            font-weight: bold;
+        }
+        
+        .features {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f0f4f8;
+            border-radius: 10px;
+        }
+        
+        .features h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        .features ul {
+            list-style: none;
+        }
+        
+        .features li {
+            padding: 8px 0;
+            color: #666;
+            padding-left: 25px;
+            position: relative;
+        }
+        
+        .features li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #667eea;
+            font-weight: bold;
+        }
+        
+        .processing {
+            display: none;
+            text-align: center;
+            margin-top: 30px;
+        }
+        
+        .processing.show {
+            display: block;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>CGT EEG Analysis</h1>
+        <p class="subtitle">Advanced consciousness gradient analysis for your EEG data</p>
+        
+        <div class="upload-area" id="uploadArea">
+            <div class="upload-icon">📊</div>
+            <p class="upload-text">Drag and drop your EDF file here</p>
+            <p style="color: #999; margin: 10px 0;">or</p>
+            <button class="btn">Browse Files</button>
+            <input type="file" class="file-input" id="fileInput" accept=".edf">
+        </div>
+        
+        <div class="file-info" id="fileInfo">
+            <div class="file-name" id="fileName"></div>
+            <div class="file-size" id="fileSize"></div>
+        </div>
+        
+        <div class="analysis-options" id="analysisOptions">
+            <h3 style="margin-bottom: 15px;">Analysis Options:</h3>
+            <div class="option">
+                <label>
+                    <input type="checkbox" checked> Multi-band frequency analysis (Delta, Theta, Alpha, Beta, Gamma)
+                </label>
+            </div>
+            <div class="option">
+                <label>
+                    <input type="checkbox" checked> Temporal stability assessment
+                </label>
+            </div>
+            <div class="option">
+                <label>
+                    <input type="checkbox" checked> Integration metrics (Phi, Rho, Sigma)
+                </label>
+            </div>
+            <div class="option">
+                <label>
+                    <input type="checkbox" checked> 3D visualization
+                </label>
+            </div>
+        </div>
+        
+        <button class="btn submit-btn" id="submitBtn">Analyze EEG Data</button>
+        
+        <div class="price" id="price" style="display: none;">£75 per analysis</div>
+        
+        <div class="processing" id="processing">
+            <div class="spinner"></div>
+            <p>Processing your EEG data...</p>
+            <p style="color: #999; font-size: 14px; margin-top: 10px;">This may take 1-2 minutes</p>
+        </div>
+        
+        <div class="features">
+            <h3>What's Included:</h3>
+            <ul>
+                <li>Consciousness Gradient Index (CGI) calculation</li>
+                <li>Frequency band breakdown (0.5-45 Hz)</li>
+                <li>Temporal stability analysis</li>
+                <li>Integration and coherence metrics</li>
+                <li>Professional PDF report</li>
+                <li>3D visualization of consciousness space</li>
+                <li>Results within 24 hours</li>
+            </ul>
+        </div>
+    </div>
+    
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileName = document.getElementById('fileName');
+        const fileSize = document.getElementById('fileSize');
+        const analysisOptions = document.getElementById('analysisOptions');
+        const submitBtn = document.getElementById('submitBtn');
+        const price = document.getElementById('price');
+        const processing = document.getElementById('processing');
+        
+        // Click to browse
+        uploadArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+        
+        // Drag and drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+        
+        // File input change
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+        
+        function handleFile(file) {
+            if (!file.name.toLowerCase().endsWith('.edf')) {
+                alert('Please upload an EDF file');
+                return;
+            }
+            
+            fileName.textContent = file.name;
+            fileSize.textContent = `Size: ${(file.size / 1024 / 1024).toFixed(2)} MB`;
+            
+            fileInfo.classList.add('show');
+            analysisOptions.classList.add('show');
+            submitBtn.classList.add('show');
+            price.style.display = 'block';
+        }
+        
+        submitBtn.addEventListener('click', async () => {
+            submitBtn.style.display = 'none';
+            processing.classList.add('show');
+            
+            // Create FormData
+            const formData = new FormData();
+            formData.append('eeg_file', fileInput.files[0]);
+            
+            try {
+                // Send to your backend
+                const response = await fetch('http://127.0.0.1:5000/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    processing.innerHTML = '<p style="color: #48bb78; font-size: 18px;">✓ Analysis Complete!</p><p style="margin-top: 10px;">Check your email for the report.</p>';
+                } else {
+                    throw new Error('Upload failed');
+                }
+            } catch (error) {
+                processing.innerHTML = '<p style="color: #f56565;">Error processing file. Please try again.</p>';
+                submitBtn.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>
